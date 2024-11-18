@@ -28,33 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.browser = new System.Windows.Forms.WebBrowser();
+            this.webViewBrowser = new Microsoft.Web.WebView2.WinForms.WebView2();
+            ((System.ComponentModel.ISupportInitialize)(this.webViewBrowser)).BeginInit();
             this.SuspendLayout();
             // 
-            // browser
+            // webViewBrowser
             // 
-            this.browser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.browser.Location = new System.Drawing.Point(0, 0);
-            this.browser.MinimumSize = new System.Drawing.Size(20, 20);
-            this.browser.Name = "browser";
-            this.browser.Size = new System.Drawing.Size(586, 536);
-            this.browser.TabIndex = 0;
-            this.browser.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.browser_Navigated);
+            this.webViewBrowser.AllowExternalDrop = true;
+            this.webViewBrowser.CreationProperties = null;
+            this.webViewBrowser.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.webViewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webViewBrowser.Location = new System.Drawing.Point(0, 0);
+            this.webViewBrowser.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.webViewBrowser.Name = "webViewBrowser";
+            this.webViewBrowser.Size = new System.Drawing.Size(879, 825);
+            this.webViewBrowser.TabIndex = 0;
+            this.webViewBrowser.ZoomFactor = 1D;
             // 
             // OAuthAuthenticationForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 536);
-            this.Controls.Add(this.browser);
+            this.ClientSize = new System.Drawing.Size(879, 825);
+            this.Controls.Add(this.webViewBrowser);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "OAuthAuthenticationForm";
             this.Text = "Authentication";
+            ((System.ComponentModel.ISupportInitialize)(this.webViewBrowser)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.WebBrowser browser;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webViewBrowser;
     }
 }
