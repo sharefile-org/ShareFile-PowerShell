@@ -18,7 +18,7 @@ The ShareFile PowerShell SDK is a PowerShell snap-in that provides support for s
         </td>
         <td>
             <b>System Requirements</b><br>
-The PowerShell SDK requires <a href="http://social.technet.microsoft.com/wiki/contents/articles/21016.how-to-install-windows-powershell-4-0.aspx" target="_blank">PowerShell 4.x</a> and <a href="http://msdn.microsoft.com/en-us/library/5a4x27ek(v=vs.110).aspx" target="_blank">.NET 4.x</a>.
+The PowerShell SDK requires <a href="http://social.technet.microsoft.com/wiki/contents/articles/21016.how-to-install-windows-powershell-4-0.aspx" target="_blank">PowerShell 4.x</a>, <a href="https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48" target="_blank">.NET 4.8</a>, and the <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2" target="_blank">WebView2 runtime</a>.
         </td>
     </tr>
     <tr>
@@ -70,5 +70,5 @@ License</a>
 </table>
 
 
-To follow us on the Citrix blog, check here:
-http://blogs.citrix.com/tag/powershell-sdk/
+To follow us on the ShareFile blog, check here:
+https://www.sharefile.com/blogs
