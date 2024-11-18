@@ -2,20 +2,17 @@
 using Newtonsoft.Json.Linq;
 using ShareFile.Api.Client;
 using ShareFile.Api.Client.Events;
-using ShareFile.Api.Models;
+using ShareFile.Api.Client.Models;
 using ShareFile.Api.Powershell.Browser;
 using ShareFile.Api.Powershell.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ShareFile.Api.Powershell
 {

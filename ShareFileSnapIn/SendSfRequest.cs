@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management.Automation;
-using ShareFile.Api;
-using ShareFile.Api.Models;
-using System.IO;
+﻿using ShareFile.Api.Client.Exceptions;
+using ShareFile.Api.Client.Models;
 using ShareFile.Api.Client.Requests;
-using Newtonsoft.Json;
-using ShareFile.Api.Client.Exceptions;
-using System.Collections;
 using ShareFile.Api.Client.Requests.Filters;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Management.Automation;
 using System.Text.RegularExpressions;
 
 namespace ShareFile.Api.Powershell
@@ -150,9 +144,9 @@ namespace ShareFile.Api.Powershell
             {
                 WriteError(new ErrorRecord(new Exception(e.Code.ToString() + ": " + e.ODataExceptionMessage.Message), e.Code.ToString(), ErrorCategory.NotSpecified, query.GetEntity()));
             }
-            catch(Exception e)
+            catch (Exception)
             {
-                ShowSuggestion(Entity,Action,Parameters);
+                ShowSuggestion(Entity, Action, Parameters);
                 throw;
             }
         }

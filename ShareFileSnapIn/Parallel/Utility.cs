@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ShareFile.Api.Client.Models;
+using System;
 using System.IO;
-using System.Linq;
 using System.Management.Automation;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using ShareFile.Api.Models;
 
 namespace ShareFile.Api.Powershell.Parallel
 {

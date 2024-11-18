@@ -1,24 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using ShareFile.Api.Client.Exceptions;
 using System.Management.Automation;
-using ShareFile.Api;
-using ShareFile.Api.Models;
-using System.IO;
-using ShareFile.Api.Client.Requests;
-using System.Windows.Forms;
-using ShareFile.Api.Powershell.Browser;
-using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Security;
-using System.Runtime.InteropServices;
-using System.Resources;
-using Microsoft.Win32;
-using ShareFile.Api.Client.Exceptions;
 
 namespace ShareFile.Api.Powershell
 {

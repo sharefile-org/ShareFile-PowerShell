@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -7,7 +6,7 @@ using System.Management.Automation;
 using System.Management.Automation.Provider;
 using ShareFile.Api.Client.Exceptions;
 using ShareFile.Api.Client.Requests.Filters;
-
+using ShareFile.Api.Client.Models;
 
 namespace ShareFile.Api.Powershell
 {
@@ -31,12 +30,12 @@ namespace ShareFile.Api.Powershell
             if (path.IndexOf('*') > 0)
             {
                 var items = GetShareFileItems(di, path);
-                if (items.Count() > 0) WriteItemObject(items.ElementAt(0), path, typeof(ShareFile.Api.Models.Folder).IsAssignableFrom(items.ElementAt(0).GetType()));
+                if (items.Count() > 0) WriteItemObject(items.ElementAt(0), path, typeof(Folder).IsAssignableFrom(items.ElementAt(0).GetType()));
             }
             else
             {
                 var item = GetShareFileItem(di, path);
-                if (item != null) WriteItemObject(item, path, typeof(ShareFile.Api.Models.Folder).IsAssignableFrom(item.GetType()));
+                if (item != null) WriteItemObject(item, path, typeof(Folder).IsAssignableFrom(item.GetType()));
             }
         }
 
@@ -48,7 +47,7 @@ namespace ShareFile.Api.Powershell
             {
                 foreach (var child in children.Feed)
                 {
-                    WriteItemObject(child, System.IO.Path.Combine(path, child.FileName), typeof(ShareFile.Api.Models.Folder).IsAssignableFrom(child.GetType()));
+                    WriteItemObject(child, System.IO.Path.Combine(path, child.FileName), typeof(Folder).IsAssignableFrom(child.GetType()));
                 }
             }
         }
@@ -61,13 +60,13 @@ namespace ShareFile.Api.Powershell
             {
                 foreach (var child in children.Feed)
                 {
-                    if (typeof(ShareFile.Api.Models.Folder).IsAssignableFrom(child.GetType()) && returnContainers == ReturnContainers.ReturnAllContainers)
+                    if (typeof(Folder).IsAssignableFrom(child.GetType()) && returnContainers == ReturnContainers.ReturnAllContainers)
                     {
                         WriteItemObject(child.FileName, path, true);
                     }
                     else
                     {
-                        WriteItemObject(child, System.IO.Path.Combine(path, child.FileName), typeof(ShareFile.Api.Models.Folder).IsAssignableFrom(child.GetType()));
+                        WriteItemObject(child, System.IO.Path.Combine(path, child.FileName), typeof(Folder).IsAssignableFrom(child.GetType()));
                     }
                 }
             }
@@ -77,14 +76,14 @@ namespace ShareFile.Api.Powershell
         {
             var di = (ShareFileDriveInfo)this.PSDriveInfo;
             var item = GetShareFileItem(di, path, new string[] { "Id" });
-            return item is Models.Folder || item is Models.SymbolicLink;
+            return item is Folder || item is SymbolicLink;
         }
 
         protected override bool HasChildItems(string path)
         {
             var di = (ShareFileDriveInfo)this.PSDriveInfo;
             var item = GetShareFileItem(di, path, new string[] { "Id", "FileCount" });
-            return item is Models.Folder && ((Models.Folder)item).FileCount > 0;
+            return item is Folder && ((Folder)item).FileCount > 0;
         }
 
         protected override bool ItemExists(string path)
@@ -133,7 +132,7 @@ namespace ShareFile.Api.Powershell
             try
             {
                 var source = GetShareFileItem(di, path, new string[] { "Id" });
-                Models.Item newItem = new Models.Item();
+                Item newItem = new Item();
                 newItem.Name = newName;
                 newItem.FileName = newName;
                 di.Client.Items.Update(source.url, newItem).Execute();
@@ -155,11 +154,11 @@ namespace ShareFile.Api.Powershell
             var p = this.DynamicParameters as NewItemParameters;
             var itemName = GetChildName(path);
             var parent = GetShareFileItem(di, GetParentPath(path, PSDriveInfo.Root), new string[] { "Id", "url" });
-            Models.Item newItem = null;
+            Item newItem = null;
             var isContainer = false;
             if (itemTypeName == null || itemTypeName.ToLower().Equals("folder") || itemTypeName.ToLower().Equals("directory"))
             {
-                var folder = new Models.Folder() { Name = itemName, Description = p.Details };
+                var folder = new Folder() { Name = itemName, Description = p.Details };
                 newItem = di.Client.Items.CreateFolder(parent.url, folder, Force.ToBool()).Execute();
                 isContainer = true;
             }
@@ -167,7 +166,7 @@ namespace ShareFile.Api.Powershell
             {
                 if (p.Uri != null) 
                 {
-                    var symlink = new Models.SymbolicLink() { Name = itemName, Link = p.Uri, Description = p.Details };
+                    var symlink = new SymbolicLink() { Name = itemName, Link = p.Uri, Description = p.Details };
                     newItem = di.Client.Items.CreateSymbolicLink(parent.url, symlink, Force.ToBool()).Execute();
                     isContainer = false;
                 }
@@ -175,9 +174,9 @@ namespace ShareFile.Api.Powershell
             if (newItem != null) WriteItemObject(newItem, path, isContainer);
         }
 
-        public static Models.Item GetShareFileItem(ShareFileDriveInfo driveInfo, string path, string[] select = null, string[] expand = null)
+        public static Item GetShareFileItem(ShareFileDriveInfo driveInfo, string path, string[] select = null, string[] expand = null)
         {
-            Client.Requests.IQuery<Models.Item> query = null;
+            Client.Requests.IQuery<Item> query = null;
             if (!string.IsNullOrEmpty(path))
             {
                 // this regex matches all supported powershell path syntaxes:
@@ -199,14 +198,14 @@ namespace ShareFile.Api.Powershell
             }
             if (query != null)
             {
-                return ExecuteQuery<Models.Item>(query, select, expand);
+                return ExecuteQuery<Item>(query, select, expand);
             }
             else return null;
         }
 
-        public static IEnumerable<Models.Item> GetShareFileItems(ShareFileDriveInfo driveInfo, string path, string[] select = null, string[] expand = null)
+        public static IEnumerable<Item> GetShareFileItems(ShareFileDriveInfo driveInfo, string path, string[] select = null, string[] expand = null)
         {
-            Client.Requests.IQuery<Models.ODataFeed<Models.Item>> query = null;
+            Client.Requests.IQuery<ODataFeed<Item>> query = null;
             if (!string.IsNullOrEmpty(path))
             {
                 // this regex matches all supported powershell path syntaxes:
@@ -236,25 +235,25 @@ namespace ShareFile.Api.Powershell
             }
             if (query != null)
             {
-                var feed = ExecuteQuery<Models.ODataFeed<Models.Item>>(query, select, expand);
+                var feed = ExecuteQuery<ODataFeed<Item>>(query, select, expand);
                 return feed.Feed;
             }
             else return null;
         }
 
-        public static Models.ODataFeed<Models.Item> GetShareFileChildren(ShareFileDriveInfo driveInfo, string path, string[] select = null, string[] expand = null)
+        public static ODataFeed<Item> GetShareFileChildren(ShareFileDriveInfo driveInfo, string path, string[] select = null, string[] expand = null)
         {
             var item = GetShareFileItem(driveInfo, path, new string[] { "Id", "url" });
-            if (item != null && item is Models.Folder)
+            if (item != null && item is Folder)
             {
                 var query = driveInfo.Client.Items.GetChildren(item.url);
-                return ExecuteQuery<Models.ODataFeed<Models.Item>>(query, select, expand);
+                return ExecuteQuery<ODataFeed<Item>>(query, select, expand);
             }
             return null;
         }
 
         private static T ExecuteQuery<T>(Client.Requests.IQuery<T> query, string[] select = null, string[] expand = null)
-            where T : Models.ODataObject
+            where T : ODataObject
         {
             if (select != null) foreach (var s in select) query.Select(s);
             if (expand != null) foreach (var e in expand)

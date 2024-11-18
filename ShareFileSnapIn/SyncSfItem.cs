@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management.Automation;
-using ShareFile.Api;
-using ShareFile.Api.Models;
-using System.IO;
-using ShareFile.Api.Client;
-using ShareFile.Api.Client.Transfers;
-using ShareFile.Api.Client.FileSystem;
-using ShareFile.Api.Client.Transfers.Uploaders;
-using System.Threading;
-using ShareFile.Api.Powershell.Parallel;
-using ShareFile.Api.Powershell.Log;
-using ShareFile.Api.Client.Requests;
+﻿using ShareFile.Api.Client;
 using ShareFile.Api.Client.Exceptions;
+using ShareFile.Api.Client.Models;
+using ShareFile.Api.Client.Requests;
+using ShareFile.Api.Powershell.Parallel;
 using ShareFile.Api.Powershell.Properties;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
+using System.IO;
+using System.Linq;
+using System.Management.Automation;
 
 namespace ShareFile.Api.Powershell
 {
@@ -289,13 +280,13 @@ namespace ShareFile.Api.Powershell
                 // if create root folder flag is specified then create a container folder first
                 if (firstIteration && CreateRoot)
                 {
-                    Models.Folder parentFolder = client.Items.GetParent(item.url).Execute() as Folder;
+                    Folder parentFolder = client.Items.GetParent(item.url).Execute() as Folder;
 
                     target = CreateLocalFolder(target, parentFolder);
                     firstIteration = false;
                 }
 
-                if (item is Models.Folder)
+                if (item is Folder)
                 {
                     // if user downloading the root drive then download its root folders
                     if ((item as Folder).Info.IsAccountRoot.GetValueOrDefault())
@@ -311,7 +302,7 @@ namespace ShareFile.Api.Powershell
 
                         foreach (var child in children.Feed)
                         {
-                            if (child is Models.Folder)
+                            if (child is Folder)
                             {
                                 DownloadRecursive(client, transactionId, child, target, actionType);
 
@@ -326,9 +317,9 @@ namespace ShareFile.Api.Powershell
                         shareFileItems.Add(item);
                     }
                 }
-                else if (item is Models.File)
+                else if (item is Client.Models.File)
                 {
-                    DownloadAction downloadAction = new DownloadAction(FileSupport, client, transactionId, (Models.File)item, target, actionType);
+                    DownloadAction downloadAction = new DownloadAction(FileSupport, client, transactionId, (Client.Models.File)item, target, actionType);
                     actionManager.AddAction(downloadAction);
 
                     shareFileItems.Add(item);
@@ -374,9 +365,9 @@ namespace ShareFile.Api.Powershell
         /// <summary>
         /// Download all items recursively
         /// </summary>
-        private void DownloadRecursive(ShareFileClient client, int downloadId, Models.Item source, DirectoryInfo target, ActionType actionType)
+        private void DownloadRecursive(ShareFileClient client, int downloadId, Item source, DirectoryInfo target, ActionType actionType)
         {
-            if (source is Models.Folder)
+            if (source is Folder)
             {
                 var subdir = CreateLocalFolder(target, source as Folder);
 
@@ -399,13 +390,13 @@ namespace ShareFile.Api.Powershell
                     {
                         child.Parent = source;
 
-                        if (child is Models.Folder && Recursive)
+                        if (child is Folder && Recursive)
                         {
                             DownloadRecursive(client, downloadId, child, subdir, actionType);
                         }
-                        else if (child is Models.File)
+                        else if (child is Client.Models.File)
                         {
-                            DownloadAction downloadAction = new DownloadAction(FileSupport, client, downloadId, (Models.File)child, subdir, actionType);
+                            DownloadAction downloadAction = new DownloadAction(FileSupport, client, downloadId, (Client.Models.File)child, subdir, actionType);
                             actionManager.AddAction(downloadAction);
                         }
                     }
@@ -418,13 +409,13 @@ namespace ShareFile.Api.Powershell
         /// <summary>
         /// Delete the Sharefile items if Move flag is used
         /// </summary>
-        private void DeleteShareFileItemRecursive(ShareFileClient client, Models.Item source, bool deleteFolder)
+        private void DeleteShareFileItemRecursive(ShareFileClient client, Item source, bool deleteFolder)
         {
-            if (source is Models.Folder)
+            if (source is Folder)
             {
                 var children = (source as Folder).Children;
-                var childFiles = children.OfType<Models.File>();
-                var childFolders = children.OfType<Models.Folder>();
+                var childFiles = children.OfType<Client.Models.File>();
+                var childFolders = children.OfType<Folder>();
                 
                 RemoveShareFileItems(client, source, childFiles);
 
@@ -438,14 +429,14 @@ namespace ShareFile.Api.Powershell
 
                 if (deleteFolder)
                 {
-                    if(!HasChildren(client, source as Models.Folder))
+                    if(!HasChildren(client, source as Folder))
                     {
                         RemoveShareFileItem(client, source);
                     }
                 }
             }
             
-            if (source is Models.File)
+            if (source is Client.Models.File)
             {
                 RemoveShareFileItem(client, source);
             }
@@ -454,7 +445,7 @@ namespace ShareFile.Api.Powershell
         /// <summary>
         /// Clean the target folders in case of Strict flag
         /// </summary>
-        private void DeleteLocalStrictRecursive(ShareFileClient client, Models.Item source, DirectoryInfo target)
+        private void DeleteLocalStrictRecursive(ShareFileClient client, Item source, DirectoryInfo target)
         {
             var directories = target.GetDirectories();
             var children = client.Items.GetChildren(source.url).Execute();
@@ -465,7 +456,7 @@ namespace ShareFile.Api.Powershell
 
                 foreach (var child in children.Feed)
                 {
-                    if (child is Models.Folder && child.Name.Equals(directory.Name))
+                    if (child is Folder && child.Name.Equals(directory.Name))
                     {
                         DeleteLocalStrictRecursive(client, child, directory);
                         found = true;
@@ -486,7 +477,7 @@ namespace ShareFile.Api.Powershell
                 bool found = false;
                 foreach (var child in children.Feed)
                 {
-                    if (child is Models.File && child.Name.Equals(file.Name))
+                    if (child is Client.Models.File && child.Name.Equals(file.Name))
                     {
                         found = true;
                         break;
@@ -537,7 +528,7 @@ namespace ShareFile.Api.Powershell
         /// <summary>
         /// Start Upload to Sharefile location
         /// </summary>
-        private void StartUpload(ShareFileClient client, int uploadId, Models.Item target, ICollection<string> resolvedPaths, ActionType actionType)
+        private void StartUpload(ShareFileClient client, int uploadId, Item target, ICollection<string> resolvedPaths, ActionType actionType)
         {
             int transactionId = new Random((int)DateTime.Now.Ticks).Next();
 
@@ -553,7 +544,7 @@ namespace ShareFile.Api.Powershell
                 if (firstIteration && CreateRoot)
                 {
                     DirectoryInfo parentFolder = Directory.GetParent(path);
-                    var newFolder = new Models.Folder() { Name = parentFolder.Name };
+                    var newFolder = new Folder() { Name = parentFolder.Name };
                     target = client.Items.CreateFolder(target.url, newFolder, OverWrite, false).Execute();
                     firstIteration = false;
                 }
@@ -584,7 +575,7 @@ namespace ShareFile.Api.Powershell
                         
                         foreach (var child in children.Feed)
                         {
-                            if (child is Models.Folder && child.Name.Equals(source.Name))
+                            if (child is Folder && child.Name.Equals(source.Name))
                             {
                                 DeleteSharefileStrictRecursive(client, source as DirectoryInfo, child);
                                 break;
@@ -609,11 +600,11 @@ namespace ShareFile.Api.Powershell
         /// <summary>
         /// Upload contents recursively
         /// </summary>
-        private void UploadRecursive(ShareFileClient client, int uploadId, FileSystemInfo source, Models.Item target, ActionType actionType)
+        private void UploadRecursive(ShareFileClient client, int uploadId, FileSystemInfo source, Item target, ActionType actionType)
         {
             if (source is DirectoryInfo)
             {
-                var newFolder = new Models.Folder() { Name = source.Name };
+                var newFolder = new Folder() { Name = source.Name };
                 bool isExist = false;
 
                 if (Synchronize)
@@ -679,7 +670,7 @@ namespace ShareFile.Api.Powershell
             foreach (var child in children.Feed)
             {
                 bool found = false;
-                if (child is Models.Folder)
+                if (child is Folder)
                 {
                     foreach (DirectoryInfo directory in directories)
                     {
@@ -690,7 +681,7 @@ namespace ShareFile.Api.Powershell
                         }
                     }
                 }
-                else if (child is Models.File)
+                else if (child is Client.Models.File)
                 {
                     foreach (FileInfo file in files)
                     {
