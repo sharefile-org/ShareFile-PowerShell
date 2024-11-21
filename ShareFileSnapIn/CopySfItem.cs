@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management.Automation;
-using ShareFile.Api;
-using ShareFile.Api.Models;
-using System.IO;
-using ShareFile.Api.Client;
-using ShareFile.Api.Client.Transfers;
-using ShareFile.Api.Client.FileSystem;
-using ShareFile.Api.Client.Transfers.Uploaders;
-using System.Threading;
-using ShareFile.Api.Powershell.Parallel;
+﻿using ShareFile.Api.Client;
+using ShareFile.Api.Client.Models;
 using ShareFile.Api.Powershell.Log;
+using ShareFile.Api.Powershell.Parallel;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Management.Automation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ShareFile.Api.Powershell
 {
@@ -163,7 +158,7 @@ namespace ShareFile.Api.Powershell
                 var targetProviderPath = this.SessionState.Path.GetUnresolvedProviderPathFromPSPath(paramDestination, out targetProvider, out targetDrive);
                 bool isTargetLocal = targetProvider.ImplementingType == typeof(Microsoft.PowerShell.Commands.FileSystemProvider);
                 bool isTargetSF = targetProvider.ImplementingType == typeof(ShareFileProvider);
-                Models.Item targetItem = null;
+                Item targetItem = null;
                 if (isTargetSF)
                 {
                     targetItem = ShareFileProvider.GetShareFileItem((ShareFileDriveInfo)targetDrive, targetProviderPath);
@@ -273,11 +268,11 @@ namespace ShareFile.Api.Powershell
             }
         }
 
-        private void RecursiveUpload(ShareFileClient client, int uploadId, FileSystemInfo source, Models.Item target)
+        private void RecursiveUpload(ShareFileClient client, int uploadId, FileSystemInfo source, Item target)
         {
             if (source is DirectoryInfo)
             {
-                var newFolder = new Models.Folder() { Name = source.Name };
+                var newFolder = new Folder() { Name = source.Name };
                 newFolder = client.Items.CreateFolder(target.url, newFolder, Force || ResumeSupport.IsPending, false).Execute();
 
                 ActionManager actionManager = new ActionManager(this, source.Name);
@@ -314,9 +309,9 @@ namespace ShareFile.Api.Powershell
             }
         }
 
-        private void RecursiveDownload(ShareFileClient client, int downloadId, Models.Item source, DirectoryInfo target)
+        private void RecursiveDownload(ShareFileClient client, int downloadId, Item source, DirectoryInfo target)
         {
-            if (source is Models.Folder)
+            if (source is Folder)
             {
                 var children = client.Items.GetChildren(source.url).Execute();
                 var subdirCheck = new DirectoryInfo(System.IO.Path.Combine(target.FullName, source.FileName));
@@ -329,16 +324,16 @@ namespace ShareFile.Api.Powershell
                     foreach (var child in children.Feed)
                     {
 
-                        if (child is Models.Folder)
+                        if (child is Folder)
                         {
                             RecursiveDownload(client, downloadId, child, subdir);
                         }
-                        else if (child is Models.File)
+                        else if (child is Client.Models.File)
                         {
                             if (!ResumeSupport.IsPending || !ResumeSupport.CheckFileStatus(child.FileName))
                             {
                                 ActionType actionType = Force || ResumeSupport.IsPending ? ActionType.Force : ActionType.None;
-                                DownloadAction downloadAction = new DownloadAction(FileSupport, client, downloadId, (Models.File)child, subdir, actionType);
+                                DownloadAction downloadAction = new DownloadAction(FileSupport, client, downloadId, (Client.Models.File)child, subdir, actionType);
                                 actionManager.AddAction(downloadAction);
                             }
                         }
@@ -347,13 +342,13 @@ namespace ShareFile.Api.Powershell
                     actionManager.Execute();
                 }
             }
-            else if (source is Models.File)
+            else if (source is Client.Models.File)
             {
                 ActionManager actionManager = new ActionManager(this, source.FileName);
                 if (!ResumeSupport.IsPending || !ResumeSupport.CheckFileStatus(source.FileName))
                 {
                     ActionType actionType = Force || ResumeSupport.IsPending ? ActionType.Force : ActionType.None;
-                    DownloadAction downloadAction = new DownloadAction(FileSupport, client, downloadId, (Models.File)source, target, actionType);
+                    DownloadAction downloadAction = new DownloadAction(FileSupport, client, downloadId, (Client.Models.File)source, target, actionType);
                     actionManager.AddAction(downloadAction);
                 }
                 actionManager.Execute();

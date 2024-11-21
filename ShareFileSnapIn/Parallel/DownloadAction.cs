@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Management.Automation;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using ShareFile.Api.Client.Transfers.Downloaders;
+﻿using System.IO;
 
 namespace ShareFile.Api.Powershell.Parallel
 {
@@ -16,7 +7,7 @@ namespace ShareFile.Api.Powershell.Parallel
     /// </summary>
     class DownloadAction : IAction
     {
-        private Models.File child;
+        private Client.Models.File child;
         private Client.ShareFileClient client;
         private int downloadId;
         private FileSystemInfo target;
@@ -42,7 +33,7 @@ namespace ShareFile.Api.Powershell.Parallel
             }
         }
 
-        public DownloadAction(FileSupport fileSupport, Client.ShareFileClient client, int downloadId, Models.File child, FileSystemInfo target, ActionType type)
+        public DownloadAction(FileSupport fileSupport, Client.ShareFileClient client, int downloadId, Client.Models.File child, FileSystemInfo target, ActionType type)
         {
             this.child = child;
             this.client = client;
@@ -70,7 +61,7 @@ namespace ShareFile.Api.Powershell.Parallel
 
                     progressInfo.ProgressTotal(progressInfo.FileIndex, child.FileSizeBytes.GetValueOrDefault());
 
-                    downloader.OnTransferProgress =
+                    downloader.OnTransferProgress +=
                         (sender, args) =>
                         {
                             if (args.Progress.TotalBytes > 0)

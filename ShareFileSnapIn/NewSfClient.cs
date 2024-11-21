@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShareFile.Api.Powershell.Properties;
 using System.Management.Automation;
-using ShareFile.Api;
-using ShareFile.Api.Models;
-using System.IO;
-using ShareFile.Api.Client.Requests;
-using ShareFile.Api.Powershell.Properties;
-using ShareFile.Api.Powershell.Browser;
 
 namespace ShareFile.Api.Powershell
 {

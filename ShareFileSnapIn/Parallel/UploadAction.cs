@@ -2,9 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using ShareFile.Api.Client.Exceptions;
-using ShareFile.Api.Client.FileSystem;
+using ShareFile.Api.Client.Models;
 using ShareFile.Api.Client.Transfers;
-using ShareFile.Api.Models;
 
 namespace ShareFile.Api.Powershell.Parallel
 {
@@ -15,7 +14,7 @@ namespace ShareFile.Api.Powershell.Parallel
     {
         private FileSystemInfo child;
         private Client.ShareFileClient client;
-        private Models.Item uploadTarget;
+        private Item uploadTarget;
         private String details;
         private FileSupport fileSupportDelegate;
         private ActionType actionType;
@@ -39,7 +38,7 @@ namespace ShareFile.Api.Powershell.Parallel
             }
         }
 
-        public UploadAction(FileSupport fileSupport, Client.ShareFileClient client, FileSystemInfo source, Models.Item target, String details, ActionType type)
+        public UploadAction(FileSupport fileSupport, Client.ShareFileClient client, FileSystemInfo source, Item target, String details, ActionType type)
         {
             this.client = client;
             this.child = source;
@@ -52,7 +51,7 @@ namespace ShareFile.Api.Powershell.Parallel
         void IAction.CopyFileItem(ProgressInfo progressInfo)
         {
             var fileInfo = (FileInfo)child;
-            Models.Item fileItem = null;
+            Item fileItem = null;
             fileName = child.Name;
             try
             {
@@ -65,8 +64,8 @@ namespace ShareFile.Api.Powershell.Parallel
                 }
             }
 
-            bool duplicate = fileItem != null && fileItem is Models.File;
-            bool hashcodeMatches = duplicate ? (fileItem as Models.File).Hash.Equals(Utility.GetMD5HashFromFile(child.FullName)) : false;
+            bool duplicate = fileItem != null && fileItem is Client.Models.File;
+            bool hashcodeMatches = duplicate ? (fileItem as Client.Models.File).Hash.Equals(Utility.GetMD5HashFromFile(child.FullName)) : false;
 
             if (duplicate && actionType == ActionType.None) 
             {
@@ -86,13 +85,13 @@ namespace ShareFile.Api.Powershell.Parallel
                     Raw = true
                 };
 
-                using (var platformFileInfo = new PlatformFileInfo(fileInfo))
+                using (var fileStream = fileInfo.OpenRead())
                 {
-                    var uploader = client.GetAsyncFileUploader(uploadSpec, platformFileInfo);
+                    var uploader = client.GetAsyncFileUploader(uploadSpec, fileStream);
 
                     progressInfo.ProgressTotal(progressInfo.FileIndex, fileInfo.Length);
 
-                    uploader.OnTransferProgress =
+                    uploader.OnTransferProgress +=
                         (sender, args) =>
                         {
                             if (args.Progress.TotalBytes > 0)
