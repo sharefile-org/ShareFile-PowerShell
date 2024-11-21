@@ -14,6 +14,8 @@
     
     <Feature Id="ProductFeature" Title="ShareFileSnapIn_Installer" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
+	  <ComponentGroupRef Id="WebView2" />
+	  <ComponentGroupRef Id="WebView2Runtimes"/>
       <ComponentRef Id="CMP_DocumentationShortcut" />
       <ComponentRef Id="IEBrowserEmulation" />
     </Feature>
@@ -21,9 +23,9 @@
     <Icon Id="ShareFileIcon.ico" SourceFile="$(var.SourcePathAssets)\sf-icon.ico"/>
     <Property Id="ARPPRODUCTICON" Value="ShareFileIcon.ico" />
 
-    <PropertyRef Id="NETFRAMEWORK45"/>
-    <Condition Message="This setup requires Microsoft .NET Framework 4.5 package or greater needs to be installed for this installation to continue.">
-      <![CDATA[Installed OR NETFRAMEWORK45]]>
+    <PropertyRef Id="WIX_IS_NETFRAMEWORK_48_OR_LATER_INSTALLED"/>
+    <Condition Message="This setup requires Microsoft .NET Framework 4.8 package or greater to be installed for this installation to continue.">
+      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_48_OR_LATER_INSTALLED]]>
     </Condition>
 
     <PropertyRef Id="POWERSHELLVERSION"/>
@@ -67,6 +69,17 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="ShareFileSnapIn_Installer">
+		  <Directory Id="WebView2Runtimes" Name="runtimes">
+		    <Directory Id="win_arm64" Name="win-arm64">
+			  <Directory Id="win_arm64_native" Name="native"/>
+			</Directory>
+			<Directory Id="win_x64" Name="win-x64">
+			  <Directory Id="win_x64_native" Name="native"/>
+			</Directory>
+			<Directory Id="win_x86" Name="win-x86">
+			  <Directory Id="win_x86_native" Name="native"/>
+			</Directory>	
+		  </Directory>
           <Directory Id="SubModulesFolder" Name="$(var.ShareFileSnapIn.TargetName)" />
         </Directory>
         <Directory Id="ProgramMenuFolder">
@@ -106,6 +119,31 @@
       <Component Guid="9e8a9642-059f-41a4-8fc2-533da4e73e4a" Win64="yes">
         <File Name="InstallTestSnapIn.ps1" KeyPath="yes" Source="$(var.SourceRootPath)\Add-ShareFile-SnapIn.ps1" />
       </Component>
+    </ComponentGroup>
+  </Fragment>
+	
+  <Fragment>
+    <ComponentGroup Id="WebView2" Directory="INSTALLFOLDER">
+      <Component Guid="*" Win64="yes">
+        <File Id="Microsoft.Web.WebView2.Core.dll" Vital="yes" Source="$(var.SourceRootPath)\Microsoft.Web.WebView2.Core.dll"/>
+      </Component>
+	  <Component Guid="*" Win64="yes">
+        <File Id="Microsoft.Web.WebView2.WinForms.dll" Vital="yes" Source="$(var.SourceRootPath)\Microsoft.Web.WebView2.WinForms.dll"/>
+      </Component>
+	  <Component Guid="*" Win64="yes">
+        <File Id="Microsoft.Web.WebView2.Wpf.dll" Vital="yes" Source="$(var.SourceRootPath)\Microsoft.Web.WebView2.Wpf.dll"/>
+      </Component>
+	</ComponentGroup>
+	<ComponentGroup Id="WebView2Runtimes">
+	  <Component Guid="*" Win64="yes" Directory="win_x86_native">
+	    <File Id="WebView2Loader.dll.x86" Vital="yes" Source="$(var.SourceRootPath)\runtimes\win-x86\native\WebView2Loader.dll"/>	  
+	  </Component>
+	  <Component Guid="*" Win64="yes" Directory="win_x64_native">
+	    <File Id="WebView2Loader.dll.x64" Vital="yes" Source="$(var.SourceRootPath)\runtimes\win-x64\native\WebView2Loader.dll"/>	  
+	  </Component>
+	  <Component Guid="*" Win64="yes" Directory="win_arm64_native">
+	    <File Id="WebView2Loader.dll.arm64" Vital="yes" Source="$(var.SourceRootPath)\runtimes\win-arm64\native\WebView2Loader.dll"/>	  
+	  </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>
