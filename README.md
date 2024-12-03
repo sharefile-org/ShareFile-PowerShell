@@ -2,6 +2,10 @@ ShareFile PowerShell SDK
 ========================
 The ShareFile PowerShell SDK is a PowerShell snap-in that provides support for saving a user login for use in scripts, provides access to the ShareFile API, and also a provider that can be used within PowerShell to map to a ShareFile account.
 
+> NOTE: If looking for a PowerShell module, it can be found at https://github.com/sharefile-org/ShareFile-PowerShell-Module.
+>
+> This is the same ShareFile PowerShell SDK functionality, but supporting PowerShell 5.x and 7+ 
+
 <table>
     <tr>
         <td height="69" width="69">
